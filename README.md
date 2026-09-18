@@ -2,6 +2,8 @@
 
 > 사용자가 읽은 책과 리뷰·태그를 바탕으로 책을 기록하고, 관련 도서를 탐색할 수 있도록 만든 **Django 기반 도서 추천·리뷰 플랫폼**입니다.
 
+[Notion Portfolio ↗](https://lush-echo-8d0.notion.site/Service-Business-Planning-Portfolio-3dde2258cda6804b8c96fcae751252b9)
+
 **Project** Information Systems Development Project  
 **Role** PM · Service Planning · Development  
 **Focus** Book CRUD · Review/Tag Data · Recommendation · External API Integration
