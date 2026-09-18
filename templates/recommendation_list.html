@@ -1,0 +1,33 @@
+{% extends 'binder/base.html' %}
+{% block title %}추천 목록{% endblock %}
+{% block content %}
+<h1>추천 목록</h1>
+<table>
+  <thead>
+    <tr><th>ID</th><th>User</th><th>Book</th><th>Rating</th><th>Actions</th></tr>
+  </thead>
+  <tbody id="rec-list">
+    <!-- JS 로 리스트 로딩 -->
+  </tbody>
+</table>
+<script>
+$(function(){
+  $.getJSON("{% url 'binder:recommendation-list-create' %}", data => {
+    $('#rec-list').empty();
+    data.forEach(r => {
+      $('#rec-list').append(`
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.user_id}</td>
+          <td>${r.book_id}</td>
+          <td>${r.rating}</td>
+          <td>
+            <a href="{% url 'binder:recommendation-detail-update-delete' id=0 %}".replace('0', r.id)>View</a>
+          </td>
+        </tr>
+      `);
+    });
+  });
+});
+</script>
+{% endblock %}
