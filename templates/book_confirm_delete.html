@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Delete Book{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <h1 class="h4">Delete Book</h1>
+    <p><strong>{{ book.title }}</strong>을(를) 삭제할까요?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger" type="submit">Delete</button>
+      <a class="btn btn-outline-secondary" href="{% url 'binder:list_book' %}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
