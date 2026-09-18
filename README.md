@@ -72,7 +72,7 @@ book-recommendation-platform/
 └── README.md
 ```
 
-> 이 저장소는 채용 포트폴리오용 공개본입니다. 로컬 DB, IDE 설정, API 토큰 및 개인 환경값은 제외했습니다.
+> 이 저장소는 포트폴리오용 공개본입니다. 로컬 DB, IDE 설정, API 토큰 및 개인 환경값은 제외했습니다.
 
 ## Security Note
 
