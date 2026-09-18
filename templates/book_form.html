@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if book %}Edit{% else %}Add{% endif %} Book</title>
+</head>
+<body>
+    <h1>{% if book %}Edit{% else %}Add{% endif %} Book</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>ISBN or keyword:</label><br>
+        <input type="text" name="isbn" id="isbn-input" value="{{ book.isbn|default:'' }}">
+        <button type="button" onclick="fetchBookData()">Fetch</button><br><br>
+
+        <label>Title:</label><br>
+        <input type="text" name="title" id="title" value="{{ book.title|default:'' }}"><br>
+
+        <label>Author:</label><br>
+        <input type="text" name="author" id="author" value="{{ book.author|default:'' }}"><br>
+
+        <label>Description:</label><br>
+        <textarea name="description" id="description">{{ book.description|default:'' }}</textarea><br>
+
+        <label>Genre:</label><br>
+        <input type="text" name="genre" id="genre" value="{{ book.genre|default:'' }}"><br>
+
+        <label>Price:</label><br>
+        <input type="text" name="price" id="price" value="{{ book.price|default:'' }}"><br>
+
+        <label>Cover Image URL:</label><br>
+        <input type="text" name="cover_image" id="cover_image" value="{{ book.cover_image|default:'' }}"><br>
+        <img id="cover_preview" src="{{ book.cover_image|default:'' }}" width="150"><br>
+
+        <label>Rating (0-5):</label><br>
+        <input type="number" name="rating" step="0.1" max="5" min="0" value="{{ book.rating|default:'0' }}"><br>
+
+        <label>Tags (comma separated):</label><br>
+        <input type="text" name="tags" value="{% for tag in book.tags.all %}{{ tag.tag }}{% if not forloop.last %}, {% endif %}{% endfor %}"><br><br>
+
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'list_book' %}">Back to list</a>
+
+    <script>
+        function fetchBookData() {
+            const query = document.getElementById('isbn-input').value;
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.totalItems > 0) {
+                    const info = data.items[0].volumeInfo;
+                    document.getElementById('title').value = info.title || '';
+                    document.getElementById('author').value = (info.authors || []).slice(0, 3).join(', ');
+                    document.getElementById('description').value = info.description || '';
+                    document.getElementById('cover_image').value = info.imageLinks ? info.imageLinks.thumbnail : '';
+                    document.getElementById('genre').value = (info.categories || []).join(', ');
+                    document.getElementById('cover_preview').src = info.imageLinks ? info.imageLinks.thumbnail : '';
+
+                } else {
+                    alert('No book found for this query.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error fetching book data.');
+            });
+        }
+    </script>
+</body>
+</html>
