@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  새 추천
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h3 class="mb-0">책 추천 받기</h3>
+    </div>
+    <div class="card-body">
+      <form id="rec-form" novalidate>
+        {% csrf_token %}
+
+        <!-- 1) 읽은 책 중 선택 -->
+        <div class="mb-3">
+          <label for="bookSelect" class="form-label">도서 선택</label>
+          <select id="bookSelect"
+                  name="book_id"
+                  class="form-select"
+                  required>
+            {% for book in books %}
+              <option value="{{ book.id }}">{{ book.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- 2) 카테고리 선택 -->
+        <div class="mb-3">
+          <label for="categorySelect" class="form-label">Select Category:</label>
+          <select id="categorySelect" name="category" class="form-select" required>
+            <option value="">-- Select a category --</option>
+          </select>
+        </div>
+
+        <!-- 3) 유사 도서 추천 영역 -->
+        <div class="mb-4">
+          <h5>유사 도서 추천</h5>
+          <div id="similar-list" class="row g-3"></div>
+        </div>
+
+        <!-- 4) 버튼 그룹 -->
+        <div class="d-flex justify-content-end">
+          <button type="button" id="fetchBooksBtn" class="btn btn-primary me-2">
+            추천 책 가져오기
+          </button>
+          <button type="submit" class="btn btn-primary">저장</button>
+          <a href="{% url 'recommendation-list-create' %}" class="btn btn-link">취소</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+$(function(){
+    $.ajaxSetup({
+      headers:  { 'X-Requested-With': 'XMLHttpRequest' },
+      dataType: 'json'
+    });
+  const listUrl    = "{% url 'recommendation-list-create' %}";
+  const similarUrl = "{% url 'recommendation-similar' %}";
+
+  // 초기 유사 도서 로드
+  const initBook = $('#bookSelect').val();
+  if (initBook) loadSimilar(initBook);
+
+  // 책 선택 또는 유사 도서 버튼 클릭 시 유사 도서 다시 로드
+  $('#bookSelect, #fetch-similar').on('change click', function(){
+    loadSimilar($('#bookSelect').val());
+  });
+
+  // 추천 저장
+  $('#rec-form').submit(function(e){
+    e.preventDefault();
+    const payload = {
+      book_id: +$('#bookSelect').val(),
+    };
+    $.ajax({
+      url: listUrl,
+      type: 'POST',
+      data: JSON.stringify(payload),
+      contentType: 'application/json',
+      success: () => window.location.href = listUrl,
+      error: xhr => alert('에러 발생: ' + xhr.responseText)
+    });
+  });
+
+  // 추천 책 가져오기 버튼 → Google Books API로 category 목록 로딩
+  $('#fetchBooksBtn').on('click', function(){
+    const query = $('#bookSelect option:selected').text();
+    populateCategories(query);
+  });
+
+  // 책 바꿀 때도 카테고리 새로 불러오기
+  $('#bookSelect').on('change', function(){
+    const query = $('#bookSelect option:selected').text();
+    populateCategories(query);
+  });
+
+  // 카테고리 선택 시 해당 카테고리의 도서 추천
+  $('#categorySelect').on('change', function(){
+    const selectedCategory = $(this).val();
+    const query = $('#bookSelect option:selected').text();
+
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        const booksInCategory = [];
+        if (data.items) {
+          data.items.forEach(item => {
+            const categories = item.volumeInfo.categories || [];
+            if (categories.includes(selectedCategory)) {
+              booksInCategory.push({
+                title: item.volumeInfo.title || '제목 없음',
+                authors: (item.volumeInfo.authors || []).join(', '),
+                thumbnail: item.volumeInfo.imageLinks?.thumbnail || '',
+              });
+            }
+          });
+        }
+
+        const container = $('#similar-list');
+        container.empty();
+
+        if (booksInCategory.length) {
+          booksInCategory.forEach(book => {
+            container.append(`
+              <div class="col-6 col-md-4 col-lg-3 text-center">
+                <img src="${book.thumbnail}" alt="${book.title}" class="img-fluid rounded mb-2" style="max-height:150px;">
+                <p class="small fw-bold">${book.title}</p>
+                <p class="small text-muted">${book.authors}</p>
+              </div>
+            `);
+          });
+        } else {
+          container.append('<div class="col-12"><p class="text-muted">추천 도서가 없습니다.</p></div>');
+        }
+      })
+      .catch(err => console.error('추천 도서 출력 실패:', err));
+  });
+
+  // Google Books API에서 카테고리 추출
+  function populateCategories(query) {
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        const cats = new Set();
+        if (data.items) {
+          data.items.forEach(item => {
+            (item.volumeInfo.categories || []).forEach(c => cats.add(c));
+          });
+        }
+
+        const select = $('#categorySelect');
+        select.empty().append('<option value="">-- Select a category --</option>');
+        Array.from(cats).forEach(cat => {
+          select.append(`<option value="${cat}">${cat}</option>`);
+        });
+      })
+      .catch(err => console.error('카테고리 불러오기 실패:', err));
+  }
+
+  // 유사 도서 (서버 API 기반, 사용 안 할 경우 생략 가능)
+  function loadSimilar(bookId){
+    $.getJSON(similarUrl, { book_id: bookId }, data => {
+      const container = $('#similar-list');
+      container.empty();
+      if(data.length){
+        data.forEach(b => {
+          container.append(`
+            <div class="col-6 col-md-4 col-lg-3 text-center">
+              <img src="${b.cover_image}" alt="${b.title}"
+                   class="img-fluid rounded mb-2"
+                   style="max-height:150px;">
+              <p class="small">${b.title}</p>
+            </div>
+          `);
+        });
+      } else {
+        container.append('<div class="col-12"><p class="text-muted">추천 도서가 없습니다.</p></div>');
+      }
+    }).fail((xhr, status, err) => {
+      console.error('❌ loadSimilar error:', status, err, xhr.responseText);
+    });
+  }
+
+});
+</script>
+{% endblock %}
