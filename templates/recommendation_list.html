@@ -1,32 +1,40 @@
-{% extends 'binder/base.html' %}
-{% block title %}추천 목록{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Recommendations · Book Platform{% endblock %}
 {% block content %}
-<h1>추천 목록</h1>
-<table>
-  <thead>
-    <tr><th>ID</th><th>User</th><th>Book</th><th>Rating</th><th>Actions</th></tr>
-  </thead>
-  <tbody id="rec-list">
-    <!-- JS 로 리스트 로딩 -->
-  </tbody>
-</table>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Recommendations</h1>
+    <p class="text-secondary mb-0">읽은 책을 기준으로 관련 도서를 탐색하고 추천 결과를 저장합니다.</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'binder:recommendation-list-create' %}?action=new">New Recommendation</a>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>ID</th><th>Book</th><th>Rating</th><th></th></tr></thead>
+      <tbody id="rec-list"></tbody>
+    </table>
+  </div>
+</div>
 <script>
 $(function(){
-  $.getJSON("{% url 'binder:recommendation-list-create' %}", data => {
-    $('#rec-list').empty();
-    data.forEach(r => {
-      $('#rec-list').append(`
-        <tr>
+  $.ajax({
+    url: "{% url 'binder:recommendation-list-create' %}",
+    headers: { "X-Requested-With": "XMLHttpRequest" },
+    dataType: "json",
+    success: data => {
+      const tbody = $('#rec-list').empty();
+      data.forEach(r => {
+        const detail = "{% url 'binder:recommendation-detail-update-delete' id=0 %}".replace('/0/', `/${r.id}/`);
+        tbody.append(`<tr>
           <td>${r.id}</td>
-          <td>${r.user_id}</td>
-          <td>${r.book_id}</td>
+          <td>${r.book?.title || r.book_id}</td>
           <td>${r.rating}</td>
-          <td>
-            <a href="{% url 'binder:recommendation-detail-update-delete' id=0 %}".replace('0', r.id)>View</a>
-          </td>
-        </tr>
-      `);
-    });
+          <td><a class="btn btn-sm btn-outline-secondary" href="${detail}">View</a></td>
+        </tr>`);
+      });
+      if (!data.length) tbody.append('<tr><td colspan="4" class="text-secondary text-center py-4">저장된 추천이 없습니다.</td></tr>');
+    }
   });
 });
 </script>
