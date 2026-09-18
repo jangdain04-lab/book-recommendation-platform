@@ -1,0 +1,33 @@
+{% extends 'binder/base.html' %}
+{% block title %}추천 상세{% endblock %}
+{% block content %}
+<h1>추천 상세</h1>
+<div id="rec-detail"></div>
+<button id="edit-btn">수정</button>
+<button id="del-btn">삭제</button>
+
+<script>
+const recId = {{ id }};
+const url = "{% url 'binder:recommendation-detail-update-delete' id=0 %}".replace('0', recId);
+
+$(function(){
+  // 상세 로드
+  $.getJSON(url, data => {
+    $('#rec-detail').html(`
+      <p>User: ${data.user_id}</p>
+      <p>Book: ${data.book_id}</p>
+      <p>Rating: ${data.rating}</p>
+      <p>Tags: ${data.tags.join(', ')}</p>
+    `);
+  });
+
+  // 삭제
+  $('#del-btn').click(()=>{
+    $.ajax({url, method:'DELETE', success:()=> location.href="{% url 'binder:recommendation-list-create' %}"});
+  });
+
+  // 수정 페이지로 이동
+  $('#edit-btn').click(()=> location.href=`${url}?action=edit`);
+});
+</script>
+{% endblock %}
