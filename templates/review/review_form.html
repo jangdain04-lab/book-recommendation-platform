@@ -1,10 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Write Review{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-4">리뷰 작성</h1>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Book</label>
+            <select class="form-select" name="book_id" required>
+              {% for book in books %}
+                <option value="{{ book.id }}">{{ book.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rating</label>
+            <input class="form-control" type="number" name="rating" min="1" max="5" value="5" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Review</label>
+            <textarea class="form-control" name="content" rows="5" required></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Tags</label>
+            <input class="form-control" name="tags" placeholder="재미있는, 몰입감, 성장">
+          </div>
+          <button class="btn btn-primary" type="submit">Save Review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
