@@ -1,33 +1,33 @@
-{% extends 'binder/base.html' %}
-{% block title %}추천 상세{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Recommendation Detail{% endblock %}
 {% block content %}
-<h1>추천 상세</h1>
-<div id="rec-detail"></div>
-<button id="edit-btn">수정</button>
-<button id="del-btn">삭제</button>
-
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <div class="text-secondary small mb-1">Recommendation #{{ rec.id }}</div>
+        <h1 class="h4">{{ rec.book.title }}</h1>
+        <p class="text-secondary mb-1">{{ rec.book.author }}</p>
+        <p class="mb-4">Rating: {{ rec.rating }}</p>
+      </div>
+      {% if rec.book.cover_image %}
+        <img src="{{ rec.book.cover_image }}" alt="{{ rec.book.title }}" style="width:90px;height:130px;object-fit:cover" class="rounded">
+      {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'binder:recommendation-list-create' %}">Back</a>
+      <button class="btn btn-outline-danger" id="delete-rec">Delete</button>
+    </div>
+  </div>
+</div>
 <script>
-const recId = {{ id }};
-const url = "{% url 'binder:recommendation-detail-update-delete' id=0 %}".replace('0', recId);
-
-$(function(){
-  // 상세 로드
-  $.getJSON(url, data => {
-    $('#rec-detail').html(`
-      <p>User: ${data.user_id}</p>
-      <p>Book: ${data.book_id}</p>
-      <p>Rating: ${data.rating}</p>
-      <p>Tags: ${data.tags.join(', ')}</p>
-    `);
+$('#delete-rec').on('click', function(){
+  if (!confirm('이 추천 기록을 삭제할까요?')) return;
+  $.ajax({
+    url: "{% url 'binder:recommendation-detail-update-delete' id=rec.id %}",
+    method: 'DELETE',
+    success: () => window.location.href = "{% url 'binder:recommendation-list-create' %}"
   });
-
-  // 삭제
-  $('#del-btn').click(()=>{
-    $.ajax({url, method:'DELETE', success:()=> location.href="{% url 'binder:recommendation-list-create' %}"});
-  });
-
-  // 수정 페이지로 이동
-  $('#edit-btn').click(()=> location.href=`${url}?action=edit`);
 });
 </script>
 {% endblock %}
