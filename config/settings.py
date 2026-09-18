@@ -128,5 +128,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # settings.py
 
 # 로그인 성공 시 이동할 URL
-LOGIN_REDIRECT_URL = '/book/list/'
+LOGIN_REDIRECT_URL = '/books/'
 
+
+LOGOUT_REDIRECT_URL = '/books/'
