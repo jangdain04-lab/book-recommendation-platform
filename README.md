@@ -102,3 +102,12 @@ python manage.py runserver
 ## What I Learned
 
 추천 기능 자체뿐 아니라 **사용자가 남긴 데이터를 어떤 구조로 저장하고 다음 탐색 경험으로 연결할지** 설계하는 과정이 중요했습니다. 또한 외부 API를 실제 서비스 흐름에 연결하면서 환경변수와 인증정보 관리의 필요성을 배웠습니다.
+
+---
+
+## Portfolio Projects
+
+- [SafePath · Crowd Safety System](https://github.com/jangdain04-lab/safepath-crowd-safety-system)
+- [Mate It · Roommate Matching Service](https://github.com/jangdain04-lab/mateit-roommate-matching-service)
+- [Book Recommendation Platform](https://github.com/jangdain04-lab/book-recommendation-platform)
+
