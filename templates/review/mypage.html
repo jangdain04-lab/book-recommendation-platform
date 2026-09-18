@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}My Page{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">My Reading History</h1>
+<div class="row g-3">
+  {% for review in reviews %}
+    <div class="col-12 col-md-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between gap-3">
+            <h2 class="h5">{{ review.book.title }}</h2>
+            <span class="badge text-bg-warning">{{ review.rating }}/5</span>
+          </div>
+          <p class="text-secondary small">{{ review.book.author }}</p>
+          <p>{{ review.content }}</p>
+          <div class="small">
+            {% for item in review_tags %}
+              {% if item.review_id == review.id %}
+                <span class="badge text-bg-light border">#{{ item.tag.name }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-secondary">작성한 리뷰가 없습니다.</p>
+  {% endfor %}
+</div>
+{% endblock %}
