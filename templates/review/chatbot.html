@@ -1,10 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Book Chatbot{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-2">Book Chatbot</h1>
+        <p class="text-secondary">외부 LLM API 연동을 실험한 기능입니다.</p>
+        <form id="chat-form" class="d-flex gap-2">
+          <input class="form-control" id="message" name="message" placeholder="책에 대해 물어보세요." required>
+          <button class="btn btn-primary" type="submit">Send</button>
+        </form>
+        <div id="answer" class="border rounded p-3 mt-4 bg-light d-none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#chat-form').on('submit', function(e){
+  e.preventDefault();
+  $.post("{% url 'binder:gpt_chatbot' %}", { message: $('#message').val() })
+    .done(data => $('#answer').removeClass('d-none').text(data.response))
+    .fail(xhr => $('#answer').removeClass('d-none').text(xhr.responseJSON?.response || '요청에 실패했습니다.'));
+});
+</script>
+{% endblock %}
