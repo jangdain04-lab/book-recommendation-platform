@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book List</title>
+</head>
+<body>
+    <h1>📚 Book List</h1>
+    <a href="{% url 'create_book' %}">+ Add New Book</a>
+    <ul>
+        {% for book in books %}
+            <li>
+                <img src="{{ book.cover_image }}" width="100"><br>
+                <strong>{{ book.title }}</strong><br>
+                👤 Author: {{ book.author }}<br>
+                📖 Genre: {{ book.genre }}<br>
+                💵 Price: {{ book.price }}<br>
+                ⭐ Rating: {{ book.rating }}<br>
+                📘 Summary: {{ book.description|truncatewords:30 }}<br>
+                🏷️ Tags:
+                {% for tag in book.tags.all %}
+                    #{{ tag.tag }}
+                {% endfor %}
+                <br>
+                <a href="{% url 'update_book' book.id %}">Edit</a> |
+                <a href="{% url 'delete_book' book.id %}">Delete</a>
+            </li>
+            <hr>
+        {% endfor %}
+    </ul>
+</body>
+</html>
